@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id             String         @id @default(cuid())
+  email          String         @unique
+  passwordHash   String
+  name           String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  organizations  Organization[]
+}
+
+model Organization {
+  id          String      @id @default(cuid())
+  name        String
+  createdAt   DateTime    @default(now())
+
+  ownerId     String
+  owner        User       @relation(fields: [ownerId], references: [id])
+
+  projects     Project[]
+}
+
+model Project {
+  id              String      @id @default(cuid())
+  name            String
+  environment     String
+  createdAt       DateTime    @default(now())
+
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+
+  apiKeys         ApiKey[]
+  logs            Log[]
+}
+
+model ApiKey {
+  id          String      @id @default(cuid())
+  keyHash     String
+  name        String
+  createdAt   DateTime    @default(now())
+
+  projectId   String
+  project     Project     @relation(fields: [projectId], references: [id])
+}
+
+model Log {
+  id            String      @id @default(cuid())
+  serviceName   String
+  level         String
+  message       String
+  metadata      Json?
+  source        String?
+  timestamp     DateTime
+  createdAt     DateTime    @default(now())
+
+  projectId     String
+  project       Project     @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@index([createdAt])
+  @@index([level])
+  @@index([projectId, createdAt])
+}

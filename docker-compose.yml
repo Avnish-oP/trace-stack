@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres
+    container_name: logforge-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: logforge
+    ports:
+      - "5433:5432"
+  redis-stack:
+    image: redis/redis-stack
+    container_name: logforge-redis
+    restart: always
+    ports:
+      - "6379:6379"
+  adminer:
+    image: adminer:latest
+    restart: always
+    ports:
+      - "8080:8080"
