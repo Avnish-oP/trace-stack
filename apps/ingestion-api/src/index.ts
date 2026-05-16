@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import dotenv from "dotenv";
+import logsRoutes from "./routes/logs";
 
 dotenv.config();
 
@@ -12,6 +13,8 @@ app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json());
+
+app.use("/api/v1/logs", logsRoutes);
 
 app.get("/health", (_, res) => {
   res.json({
