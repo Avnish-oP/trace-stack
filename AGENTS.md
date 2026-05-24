@@ -1,0 +1,40 @@
+# TraceStack — Agent Context & Design Guidelines
+
+This file serves as a reference for agents working on the TraceStack project to maintain consistency in architecture, current progress, and design preferences.
+
+## 🚀 Current Progress
+
+**Phase 1 Completed:**
+- **Monorepo Setup**: Configured `apps/` and `packages/` with `concurrently` for local development.
+- **Shared DB (`@trace-stack/db`)**: Prisma schema enhanced with `ApiKey.prefix` for O(1) lookups, cascade deletes, and NextAuth `User.image` support. Prisma client singleton exported.
+- **Shared Types (`@trace-stack/shared`)**: Zod schemas and TypeScript DTOs.
+- **Backend Scaffold**: `apps/api-server` (Dashboard API) and `apps/ingestion-api` (Log ingestion) set up with Express, Zod validation, and basic middleware.
+- **Dashboard Skeleton**: `apps/dashboard` (Next.js) configured with NextAuth v5, Axios client, and Tailwind CSS v4.
+- **Authentication System**: Email/password auth implemented with NextAuth credentials in `apps/dashboard`, JWT verification in `apps/api-server`, Redis-backed rate limiting, Resend email verification, default organization creation on registration, and protected dashboard routing.
+
+**Current Focus:**
+- Testing and polishing the authentication flow, then continuing dashboard product pages.
+
+## 🎨 Design System & Preferences
+
+We are building a premium, developer-facing observability SaaS platform (inspired by Datadog, Vercel, Linear).
+
+**Visual Direction:**
+- **Theme**: Dark mode by default. Deep navy/charcoal backgrounds (`#0a0a0a` to `#0f111a`).
+- **Primary Colors**:
+  - Electric Purple: `#6C5CE7`
+  - Neon Cyan: `#00CEC9`
+  - Soft Pink (Errors): `#FD79A8`
+- **Typography**:
+  - Headings & Body: `Inter` (or similar clean sans-serif like Geist).
+  - Code & Data: `Space Mono` or `Geist Mono`.
+- **Aesthetic**:
+  - Technical, modern, minimal.
+  - **Glassmorphism**: Cards and panels should use frosted glass effects (`bg-white/5` or `bg-black/40` with `backdrop-blur` and subtle borders `border-white/10`).
+  - **Gradients**: Subtle purple-to-cyan gradients for primary buttons, glowing effects, and accent text.
+  - Generous whitespace and clean alignments.
+
+## 🏗 Architecture Principles
+- **Ingestion**: The `ingestion-api` must be extremely fast. It should validate (O(1) prefix lookup) and push to a queue (to be implemented in Phase 3) — NEVER write directly to PostgreSQL.
+- **Dashboard DB Access**: The Next.js frontend should NOT connect directly to the database. It must fetch all data via the `api-server` endpoints using Axios.
+- **Auth**: Managed by NextAuth (Credentials provider calling `api-server` for JWT verification).

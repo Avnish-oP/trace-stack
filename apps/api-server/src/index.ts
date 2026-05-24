@@ -5,14 +5,20 @@ import helmet from "helmet";
 import morgan from "morgan";
 import { router as apiRouter } from "./routes";
 import { errorHandler } from "./middlewares/error-handler.middleware";
+import { config } from "./config";
 
 const app = express();
-const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
 
 // ---------------------------------------------------------------------------
 // Global middleware
 // ---------------------------------------------------------------------------
-app.use(cors());
+app.set("trust proxy", config.TRUST_PROXY);
+app.use(
+  cors({
+    origin: config.CORS_ORIGIN,
+    credentials: true,
+  }),
+);
 app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json({ limit: "1mb" }));
@@ -37,8 +43,8 @@ app.use(errorHandler);
 // ---------------------------------------------------------------------------
 // Start server
 // ---------------------------------------------------------------------------
-app.listen(PORT, () => {
-  console.log(`🚀 api-server listening on http://localhost:${PORT}`);
+app.listen(config.PORT, () => {
+  console.log(`api-server listening on http://localhost:${config.PORT}`);
 });
 
 export default app;

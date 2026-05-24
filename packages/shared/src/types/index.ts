@@ -26,8 +26,10 @@ export interface AuthTokens {
 }
 
 export interface JwtPayload {
+  sub?: string;
   userId: string;
   email: string;
+  name?: string | null;
   iat?: number;
   exp?: number;
 }

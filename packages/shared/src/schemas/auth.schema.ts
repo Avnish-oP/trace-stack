@@ -32,6 +32,22 @@ export const LoginSchema = z.object({
 
 export type LoginInput = z.infer<typeof LoginSchema>;
 
+// ─── Email Verification ─────────────────────────────────────
+
+export const VerifyEmailSchema = z.object({
+  token: z.string().min(32, "Verification token is required"),
+});
+
+export type VerifyEmailInput = z.infer<typeof VerifyEmailSchema>;
+
+export const ResendVerificationSchema = z.object({
+  email: z.string().email("Invalid email address"),
+});
+
+export type ResendVerificationInput = z.infer<
+  typeof ResendVerificationSchema
+>;
+
 // ─── Update Profile ──────────────────────────────────────────
 
 export const UpdateProfileSchema = z.object({
