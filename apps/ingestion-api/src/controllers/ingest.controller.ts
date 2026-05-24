@@ -1,55 +1,55 @@
 import { Request, Response } from "express";
 import { validateApiKey } from "../services/ingestion";
 import prisma from "../lib/prisma";
-import { LogSchema } from "../types/log";
+import { IngestLogsSchema } from "@trace-stack/shared";
+import type { Prisma } from "@trace-stack/db";
 
 export const ingestLogsController = async (req: Request, res: Response) => {
-  //1.api key validation
-  //2.payload schema validation
-  //3.validate req field
-  //4. save logs to db in batch
-
   try {
-
+    // 1. API key validation
     const apiKey = req.headers["x-api-key"] as string;
     if (!apiKey) {
-      return res.status(401).json({ error: "API key is required" });
+      return res.status(401).json({ success: false, error: "API key is required" });
     }
 
-    const isValidKey = await validateApiKey(apiKey);
-
-    if (!isValidKey) {
-      return res.status(401).json({ error: "API key is invalid" });
+    const projectId = await validateApiKey(apiKey);
+    if (!projectId) {
+      return res.status(401).json({ success: false, error: "Invalid API key" });
     }
-    
-    const logs=req.body.logs;
-    if (!logs || !Array.isArray(logs)) {
-      return res.status(400).json({ error: "Logs must be an array" });
-    }
-    
-    // validate each log entry
-    logs.forEach((log: LogSchema) => {
-      if (!log.message || !log.level || !log.timestamp) {
-        return res.status(400).json({ error: "Invalid log entry" });
-      }
-    });
 
+    // 2. Payload schema validation (Zod)
+    const parsed = IngestLogsSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        success: false,
+        error: "Validation failed",
+        errors: parsed.error.issues.map((i) => ({
+          field: i.path.join("."),
+          message: i.message,
+        })),
+      });
+    }
+
+    // 3. Save logs to DB in batch
+    // TODO: Phase 3 — replace direct DB write with queue push
     await prisma.log.createMany({
-      data: logs.map((log: LogSchema) => ({
+      data: parsed.data.logs.map((log) => ({
         message: log.message,
         level: log.level,
         timestamp: new Date(log.timestamp),
-        projectId: isValidKey,
+        projectId,
         serviceName: log.serviceName,
         source: log.source,
-        metadata: log.metadata
-      }))
+        metadata: log.metadata as Prisma.InputJsonValue,
+      })),
     });
 
-    res.status(200).json({ message: "Logs ingested successfully" });
-
+    res.status(200).json({
+      success: true,
+      data: { ingested: parsed.data.logs.length },
+    });
   } catch (error) {
     console.error("Error ingesting logs:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ success: false, error: "Internal server error" });
   }
 };
