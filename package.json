@@ -1,15 +1,22 @@
 {
   "name": "trace-stack",
   "version": "1.0.0",
-  "description": "",
+  "description": "Multi-tenant observability and log monitoring SaaS platform",
   "main": "index.js",
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "packages/*",
+    "apps/*"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "concurrently \"npm run dev -w apps/dashboard\" \"npm run dev -w apps/ingestion-api\""
+    "dev": "concurrently -n dashboard,api,ingestion -c cyan,green,yellow \"npm run dev -w apps/dashboard\" \"npm run dev -w apps/api-server\" \"npm run dev -w apps/ingestion-api\"",
+    "dev:dashboard": "npm run dev -w apps/dashboard",
+    "dev:api": "npm run dev -w apps/api-server",
+    "dev:ingestion": "npm run dev -w apps/ingestion-api",
+    "db:generate": "npm run db:generate -w packages/db",
+    "db:migrate": "npm run db:migrate -w packages/db",
+    "db:studio": "npm run db:studio -w packages/db",
+    "typecheck": "concurrently \"npx --workspace=packages/shared tsc --noEmit\" \"npx --workspace=apps/ingestion-api tsc --noEmit\" \"npx --workspace=apps/api-server tsc --noEmit\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",

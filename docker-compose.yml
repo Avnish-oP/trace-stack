@@ -1,7 +1,7 @@
 services:
   postgres:
-    image: postgres
-    container_name: logforge-db
+    image: postgres:16-alpine
+    container_name: tracestack-db
     restart: always
     environment:
       POSTGRES_USER: postgres
@@ -9,14 +9,39 @@ services:
       POSTGRES_DB: logforge
     ports:
       - "5433:5432"
-  redis-stack:
-    image: redis/redis-stack
-    container_name: logforge-redis
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis/redis-stack:latest
+    container_name: tracestack-redis
     restart: always
     ports:
       - "6379:6379"
+      - "8001:8001"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   adminer:
     image: adminer:latest
+    container_name: tracestack-adminer
     restart: always
     ports:
       - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
+  redis-data:

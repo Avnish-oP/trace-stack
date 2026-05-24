@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Auth & Users ────────────────────────────────────────────
+
+model User {
+  id             String         @id @default(cuid())
+  email          String         @unique
+  passwordHash   String
+  name           String?
+  image          String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  organizations  Organization[]
+}
+
+// ─── Multi-Tenant: Organizations ─────────────────────────────
+
+model Organization {
+  id          String      @id @default(cuid())
+  name        String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  ownerId     String
+  owner       User        @relation(fields: [ownerId], references: [id])
+
+  projects    Project[]
+}
+
+// ─── Projects ────────────────────────────────────────────────
+
+model Project {
+  id              String       @id @default(cuid())
+  name            String
+  environment     String       @default("development")
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  apiKeys         ApiKey[]
+  logs            Log[]
+}
+
+// ─── API Keys ────────────────────────────────────────────────
+
+model ApiKey {
+  id          String      @id @default(cuid())
+  keyHash     String
+  prefix      String      @db.VarChar(12)
+  name        String
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+
+  projectId   String
+  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([prefix])
+  @@index([projectId])
+}
+
+// ─── Logs ────────────────────────────────────────────────────
+
+model Log {
+  id            String      @id @default(cuid())
+  serviceName   String
+  level         String
+  message       String
+  metadata      Json?
+  source        String?
+  timestamp     DateTime
+  createdAt     DateTime    @default(now())
+
+  projectId     String
+  project       Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([createdAt])
+  @@index([level])
+  @@index([serviceName])
+  @@index([projectId, createdAt])
+}
