@@ -1,8 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { JwtPayload } from "@trace-stack/shared";
+import { AuthenticatedUser, JwtPayload } from "@trace-stack/shared";
 import { config } from "../config";
 import { errorResponse } from "../utils/apiResponse";
+
+type AuthenticatedRequest = Request & {
+  user: AuthenticatedUser;
+};
 
 /**
  * Authentication middleware.
@@ -37,7 +41,7 @@ export function authenticate(
       return;
     }
 
-    req.user = {
+    (req as AuthenticatedRequest).user = {
       userId,
       email: decoded.email,
       name: decoded.name ?? null,

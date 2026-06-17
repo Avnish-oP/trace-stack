@@ -1,6 +1,11 @@
 import { NextFunction, Request, Response } from "express";
+import type { AuthenticatedUser } from "@trace-stack/shared";
 import { successResponse } from "../utils/apiResponse";
 import * as authService from "../services/auth.service";
+
+type AuthenticatedRequest = Request & {
+  user: AuthenticatedUser;
+};
 
 export async function register(
   req: Request,
@@ -34,7 +39,9 @@ export async function me(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const user = await authService.getCurrentUser(req.user.userId);
+    const user = await authService.getCurrentUser(
+      (req as AuthenticatedRequest).user.userId,
+    );
     successResponse(res, { user });
   } catch (error) {
     next(error);

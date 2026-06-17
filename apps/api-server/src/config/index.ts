@@ -5,6 +5,7 @@ const EnvSchema = z.object({
     .enum(["development", "test", "production"])
     .default("development"),
   PORT: z.coerce.number().int().positive().default(4000),
+  DATABASE_URL: z.string().url("DATABASE_URL must be a valid PostgreSQL URL"),
   CORS_ORIGIN: z.string().url().default("http://localhost:3000"),
   API_JWT_SECRET: z
     .string()
