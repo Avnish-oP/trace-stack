@@ -13,8 +13,13 @@ This file serves as a reference for agents working on the TraceStack project to 
 - **API Server CRUD**: Implemented full controllers and services for Organizations, Projects, API Keys, and Logs with strict multi-tenant validation.
 - **Premium Dashboard UI**: Constructed glassmorphism-themed UI components (Card, Button, Modal, Input, Table) in Tailwind v4 and built dynamic routing pages for managing organizations, projects, API keys, and viewing logs. Fully integrated with TanStack Query.
 
+**Phase 2 In Progress:**
+- ✅ **Step 1 — Node.js SDK (`@trace-stack/node`)**: Built `packages/sdk-node/` with zero runtime dependencies. Features: `TraceStack` client class with 5 log-level methods (`debug`, `info`, `warn`, `error`, `fatal`), in-memory batcher (configurable batch size + flush interval), HTTP transport with exponential backoff retry (3 attempts), auto-attached system metadata (`hostname`, `pid`, `nodeVersion`), graceful shutdown via `SIGTERM`/`SIGINT`/`beforeExit` handlers, API key validation, and full TypeScript types. Typechecks clean.
+- ⬜ **Step 2 — Ingestion API Hardening**: Add Redis-backed rate limiting middleware, extract API key auth into middleware, HTTP 202, request IDs, Zod config.
+- ⬜ **Step 3 — Integration Testing**: SDK → Ingestion end-to-end verification.
+
 **Current Focus:**
-- Phase 2: Node.js SDK with batching/retries and Ingestion API hardening.
+- Phase 2 Step 2: Ingestion API Hardening.
 
 ## 🎨 Design System & Preferences
 
