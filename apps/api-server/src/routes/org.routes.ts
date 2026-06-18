@@ -1,11 +1,17 @@
 import { Router } from "express";
+import * as orgController from "../controllers/org.controller";
+import { authenticate } from "../middlewares/auth.middleware";
+import { validate } from "../middlewares/validate.middleware";
+import { CreateOrgSchema, UpdateOrgSchema } from "@trace-stack/shared";
 
 const router = Router();
 
-// TODO: GET    /        — List organisations for the current user
-// TODO: POST   /        — Create a new organisation
-// TODO: GET    /:orgId  — Get organisation by ID
-// TODO: PATCH  /:orgId  — Update organisation
-// TODO: DELETE /:orgId  — Delete organisation
+router.use(authenticate);
+
+router.get("/", orgController.getOrgs);
+router.post("/", validate(CreateOrgSchema), orgController.createOrg);
+router.get("/:orgId", orgController.getOrgById);
+router.patch("/:orgId", validate(UpdateOrgSchema), orgController.updateOrg);
+router.delete("/:orgId", orgController.deleteOrg);
 
 export default router;

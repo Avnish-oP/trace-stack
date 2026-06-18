@@ -1,9 +1,12 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
+// Server-side URL (used by proxy.ts & authorize callback).
+// Falls back to NEXT_PUBLIC_API_URL for convenience in dev.
 const apiUrl = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL;
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  trustHost: true,
   providers: [
     Credentials({
       name: "Credentials",

@@ -9,11 +9,12 @@ This file serves as a reference for agents working on the TraceStack project to 
 - **Shared DB (`@trace-stack/db`)**: Prisma schema enhanced with `ApiKey.prefix` for O(1) lookups, cascade deletes, and NextAuth `User.image` support. Prisma client singleton exported.
 - **Shared Types (`@trace-stack/shared`)**: Zod schemas and TypeScript DTOs.
 - **Backend Scaffold**: `apps/api-server` (Dashboard API) and `apps/ingestion-api` (Log ingestion) set up with Express, Zod validation, and basic middleware.
-- **Dashboard Skeleton**: `apps/dashboard` (Next.js) configured with NextAuth v5, Axios client, and Tailwind CSS v4.
 - **Authentication System**: Email/password auth implemented with NextAuth credentials in `apps/dashboard`, JWT verification in `apps/api-server`, Redis-backed rate limiting, Resend email verification, default organization creation on registration, and protected dashboard routing.
+- **API Server CRUD**: Implemented full controllers and services for Organizations, Projects, API Keys, and Logs with strict multi-tenant validation.
+- **Premium Dashboard UI**: Constructed glassmorphism-themed UI components (Card, Button, Modal, Input, Table) in Tailwind v4 and built dynamic routing pages for managing organizations, projects, API keys, and viewing logs. Fully integrated with TanStack Query.
 
 **Current Focus:**
-- Testing and polishing the authentication flow, then continuing dashboard product pages.
+- Phase 2: Node.js SDK with batching/retries and Ingestion API hardening.
 
 ## 🎨 Design System & Preferences
 

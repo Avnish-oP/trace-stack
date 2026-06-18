@@ -1,9 +1,12 @@
 import { Router } from "express";
+import * as logController from "../controllers/log.controller";
+import { authenticate } from "../middlewares/auth.middleware";
+import { validate } from "../middlewares/validate.middleware";
+import { LogQuerySchema } from "@trace-stack/shared";
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
-// TODO: GET  /          — Query / list logs (with filters, pagination)
-// TODO: POST /          — Ingest a new log entry
-// TODO: GET  /:logId    — Get a single log entry by ID
+router.use(authenticate);
 
+router.get("/projects/:projectId/logs", validate(LogQuerySchema, "query"), logController.getLogs);
 export default router;
