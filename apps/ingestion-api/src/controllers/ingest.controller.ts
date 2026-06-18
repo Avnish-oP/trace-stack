@@ -1,36 +1,44 @@
-import { Request, Response } from "express";
-import { validateApiKey } from "../services/ingestion";
+import { Request, Response, NextFunction } from "express";
+import { randomUUID } from "crypto";
 import prisma from "../lib/prisma";
 import { IngestLogsSchema } from "@trace-stack/shared";
 import type { Prisma } from "@trace-stack/db";
 
-export const ingestLogsController = async (req: Request, res: Response) => {
+// ─── Ingest Logs Controller ─────────────────────────────────
+
+/**
+ * Handles log ingestion requests.
+ *
+ * Auth is handled upstream by apiKeyAuth middleware,
+ * which sets req.projectId and req.apiKeyId.
+ *
+ * Returns 202 Accepted (logs accepted for processing).
+ */
+export const ingestLogsController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    // 1. API key validation
-    const apiKey = req.headers["x-api-key"] as string;
-    if (!apiKey) {
-      return res.status(401).json({ success: false, error: "API key is required" });
-    }
+    const projectId = req.projectId!;
+    const requestId = randomUUID();
 
-    const projectId = await validateApiKey(apiKey);
-    if (!projectId) {
-      return res.status(401).json({ success: false, error: "Invalid API key" });
-    }
-
-    // 2. Payload schema validation (Zod)
+    // 1. Payload schema validation (Zod)
     const parsed = IngestLogsSchema.safeParse(req.body);
     if (!parsed.success) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: "Validation failed",
+        requestId,
         errors: parsed.error.issues.map((i) => ({
           field: i.path.join("."),
           message: i.message,
         })),
       });
+      return;
     }
 
-    // 3. Save logs to DB in batch
+    // 2. Save logs to DB in batch
     // TODO: Phase 3 — replace direct DB write with queue push
     await prisma.log.createMany({
       data: parsed.data.logs.map((log) => ({
@@ -44,12 +52,14 @@ export const ingestLogsController = async (req: Request, res: Response) => {
       })),
     });
 
-    res.status(200).json({
+    // 3. Respond with 202 Accepted + request ID for traceability
+    res.setHeader("X-Request-Id", requestId);
+    res.status(202).json({
       success: true,
+      requestId,
       data: { ingested: parsed.data.logs.length },
     });
   } catch (error) {
-    console.error("Error ingesting logs:", error);
-    res.status(500).json({ success: false, error: "Internal server error" });
+    next(error);
   }
 };

@@ -15,11 +15,11 @@ This file serves as a reference for agents working on the TraceStack project to 
 
 **Phase 2 In Progress:**
 - ✅ **Step 1 — Node.js SDK (`@trace-stack/node`)**: Built `packages/sdk-node/` with zero runtime dependencies. Features: `TraceStack` client class with 5 log-level methods (`debug`, `info`, `warn`, `error`, `fatal`), in-memory batcher (configurable batch size + flush interval), HTTP transport with exponential backoff retry (3 attempts), auto-attached system metadata (`hostname`, `pid`, `nodeVersion`), graceful shutdown via `SIGTERM`/`SIGINT`/`beforeExit` handlers, API key validation, and full TypeScript types. Typechecks clean.
-- ⬜ **Step 2 — Ingestion API Hardening**: Add Redis-backed rate limiting middleware, extract API key auth into middleware, HTTP 202, request IDs, Zod config.
-- ⬜ **Step 3 — Integration Testing**: SDK → Ingestion end-to-end verification.
+- ✅ **Step 2 — Ingestion API Hardening**: Extracted API key auth into dedicated middleware (`api-key-auth.middleware.ts`), added Redis-backed sliding window rate limiter (`rate-limit.middleware.ts`) with `X-RateLimit-*` response headers and configurable limits via env vars (`RATE_LIMIT_MAX`, `RATE_LIMIT_WINDOW_SECONDS`), added centralized error handler middleware, created Zod-validated env config (`src/config/index.ts`), changed response status `200` → `202 Accepted`, added `X-Request-Id` UUID header for traceability, added `/batch` route alias, configured CORS with env-based origin, removed unused `jsonwebtoken` dependency, cleaned up stale local `prisma/` directory. Service updated to return `{ projectId, apiKeyId }` for per-key rate limiting. Typechecks clean.
+- ✅ **Step 3 — Integration Testing**: SDK → Ingestion end-to-end verification completed. Automated test script creates a dummy user, org, project, API Key using Prisma, sends logs using the new `@trace-stack/node` SDK, verifies database insertion, and cleans up dummy data.
 
 **Current Focus:**
-- Phase 2 Step 2: Ingestion API Hardening.
+- Phase 2 completed successfully. Ready for Phase 3!
 
 ## 🎨 Design System & Preferences
 

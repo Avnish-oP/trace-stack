@@ -1,0 +1,23 @@
+import Redis from "ioredis";
+import { config } from "../config";
+
+// ─── Redis Singleton ─────────────────────────────────────────
+
+const globalForRedis = globalThis as unknown as {
+  ingestionRedis: Redis | undefined;
+};
+
+export const redis =
+  globalForRedis.ingestionRedis ??
+  new Redis(config.REDIS_URL, {
+    maxRetriesPerRequest: 2,
+    enableReadyCheck: false,
+  });
+
+redis.on("error", (error) => {
+  console.error("[ingestion-api:redis]", error.message);
+});
+
+if (config.NODE_ENV !== "production") {
+  globalForRedis.ingestionRedis = redis;
+}

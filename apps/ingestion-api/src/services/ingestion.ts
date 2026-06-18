@@ -12,9 +12,11 @@ import { API_KEY_IDENTIFIER } from "@trace-stack/shared";
  *
  * This replaces the old O(n) approach that fetched ALL keys and compared each.
  *
- * @returns projectId if valid, null otherwise
+ * @returns { projectId, apiKeyId } if valid, null otherwise
  */
-export async function validateApiKey(rawKey: string): Promise<string | null> {
+export async function validateApiKey(
+  rawKey: string
+): Promise<{ projectId: string; apiKeyId: string } | null> {
   // Strip the identifier prefix if present (e.g., "ts_abc12345..." → "abc12345...")
   const keyWithoutIdentifier = rawKey.startsWith(API_KEY_IDENTIFIER)
     ? rawKey.slice(API_KEY_IDENTIFIER.length)
@@ -45,5 +47,5 @@ export async function validateApiKey(rawKey: string): Promise<string | null> {
     .update({ where: { id: apiKey.id }, data: { lastUsedAt: new Date() } })
     .catch(() => {}); // non-critical, don't block response
 
-  return apiKey.projectId;
+  return { projectId: apiKey.projectId, apiKeyId: apiKey.id };
 }

@@ -3,14 +3,27 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import { config } from "./config";
 import logsRoutes from "./routes/logs";
+import { errorHandler } from "./middlewares/error-handler.middleware";
+
+// ─── Express App ─────────────────────────────────────────────
 
 const app = express();
 
-app.use(cors());
+// ─── Global Middleware ───────────────────────────────────────
+
+app.use(
+  cors({
+    origin: config.CORS_ORIGIN === "*" ? "*" : config.CORS_ORIGIN,
+    credentials: config.CORS_ORIGIN !== "*",
+  })
+);
 app.use(helmet());
-app.use(morgan("dev"));
+app.use(morgan(config.NODE_ENV === "production" ? "combined" : "dev"));
 app.use(express.json({ limit: "1mb" }));
+
+// ─── Routes ──────────────────────────────────────────────────
 
 app.use("/api/v1/logs", logsRoutes);
 
@@ -25,8 +38,16 @@ app.get("/health", (_, res) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+// ─── Error Handler (must be last) ────────────────────────────
 
-app.listen(PORT, () => {
-  console.log(`[ingestion-api] running on port ${PORT}`);
+app.use(errorHandler);
+
+// ─── Start Server ────────────────────────────────────────────
+
+app.listen(config.PORT, () => {
+  console.log(`[ingestion-api] running on port ${config.PORT}`);
+  console.log(`[ingestion-api] environment: ${config.NODE_ENV}`);
+  console.log(
+    `[ingestion-api] rate limit: ${config.RATE_LIMIT_MAX} req / ${config.RATE_LIMIT_WINDOW_SECONDS}s`
+  );
 });
