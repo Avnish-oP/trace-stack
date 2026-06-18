@@ -18,8 +18,8 @@ const apiClient = axios.create({
 // Attach auth token to every request
 apiClient.interceptors.request.use(async (config) => {
   const session = await getSession();
-  if (session && (session as any).accessToken) {
-    config.headers.Authorization = `Bearer ${(session as any).accessToken}`;
+  if (session?.accessToken) {
+    config.headers.Authorization = `Bearer ${session.accessToken}`;
   }
   return config;
 });
