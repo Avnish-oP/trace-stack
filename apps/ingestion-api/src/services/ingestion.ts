@@ -17,13 +17,8 @@ import { API_KEY_IDENTIFIER } from "@trace-stack/shared";
 export async function validateApiKey(
   rawKey: string
 ): Promise<{ projectId: string; apiKeyId: string } | null> {
-  // Strip the identifier prefix if present (e.g., "ts_abc12345..." → "abc12345...")
-  const keyWithoutIdentifier = rawKey.startsWith(API_KEY_IDENTIFIER)
-    ? rawKey.slice(API_KEY_IDENTIFIER.length)
-    : rawKey;
-
-  // Extract the prefix used for DB lookup
-  const prefix = keyWithoutIdentifier.substring(0, 8);
+  // Extract the prefix used for DB lookup (matches api-server logic of taking first 12 chars)
+  const prefix = rawKey.substring(0, 12);
 
   const apiKey = await prisma.apiKey.findFirst({
     where: {

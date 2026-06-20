@@ -45,10 +45,8 @@ async function main() {
 
   // 2. Create an API key
   const rawKey = "ts_live_integration1234567890";
-  // The service strips "ts_" and takes first 8 chars of remainder as prefix
-  const keyWithoutIdentifier = rawKey.substring(3); // "live_integration1234567890"
-  // Wait, the API_KEY_IDENTIFIER is "ts_". 
-  const prefix = keyWithoutIdentifier.substring(0, 8); // "live_int"
+  // The service uses the first 12 characters as the prefix
+  const prefix = rawKey.substring(0, 12); // "ts_live_inte"
   const keyHash = await bcrypt.hash(rawKey, 10);
 
   const apiKey = await prisma.apiKey.create({
@@ -82,10 +80,17 @@ async function main() {
   await logger.flush();
   await logger.destroy();
 
-  // 6. Verify logs in DB
-  const logs = await prisma.log.findMany({
-    where: { projectId: project.id }
-  });
+  // 6. Verify logs in DB (Polling due to async queue processing)
+  let logs: any[] = [];
+  let attempts = 0;
+  while (attempts < 10) {
+    logs = await prisma.log.findMany({
+      where: { projectId: project.id }
+    });
+    if (logs.length >= 3) break;
+    await new Promise(res => setTimeout(res, 500));
+    attempts++;
+  }
 
   console.log(`Found ${logs.length} logs in DB for project ${project.id}`);
   

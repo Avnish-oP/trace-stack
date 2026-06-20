@@ -6,16 +6,23 @@ import { CreateApiKeySchema } from "@trace-stack/shared";
 
 const router = Router({ mergeParams: true });
 
-router.use(authenticate);
+// This router is mounted at the root (`/`) of the API so its fully-qualified
+// paths resolve correctly (e.g. `/api/v1/projects/:projectId/api-keys`).
+// Because it is mounted at `/`, `authenticate` is applied per-route rather than
+// router-wide to avoid leaking auth middleware onto other routers (e.g. /logs).
 
-// If mounted at `/projects`, we can do `/projects/:projectId/api-keys`
-// Or if mounted at `/api-keys` directly. Let's provide explicit routes
-// assuming it will be mounted at `/` or `/api-keys`.
-// I'll make the routes clear here:
+router.get(
+  "/projects/:projectId/api-keys",
+  authenticate,
+  apikeyController.getApiKeys,
+);
+router.post(
+  "/projects/:projectId/api-keys",
+  authenticate,
+  validate(CreateApiKeySchema),
+  apikeyController.createApiKey,
+);
 
-router.get("/projects/:projectId/api-keys", apikeyController.getApiKeys);
-router.post("/projects/:projectId/api-keys", validate(CreateApiKeySchema), apikeyController.createApiKey);
-
-router.delete("/api-keys/:keyId", apikeyController.deleteApiKey);
+router.delete("/api-keys/:keyId", authenticate, apikeyController.deleteApiKey);
 
 export default router;

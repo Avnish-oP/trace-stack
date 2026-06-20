@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { randomUUID } from "crypto";
-import prisma from "../lib/prisma";
 import { IngestLogsSchema } from "@trace-stack/shared";
-import type { Prisma } from "@trace-stack/db";
+import { logIngestionQueue } from "../lib/queue";
 
 // ─── Ingest Logs Controller ─────────────────────────────────
 
@@ -38,19 +37,24 @@ export const ingestLogsController = async (
       return;
     }
 
-    // 2. Save logs to DB in batch
-    // TODO: Phase 3 — replace direct DB write with queue push
-    await prisma.log.createMany({
-      data: parsed.data.logs.map((log) => ({
-        message: log.message,
-        level: log.level,
-        timestamp: new Date(log.timestamp),
+    // 2. Push logs to queue
+    await logIngestionQueue.add(
+      "batch-ingest",
+      {
         projectId,
-        serviceName: log.serviceName,
-        source: log.source,
-        metadata: log.metadata as Prisma.InputJsonValue,
-      })),
-    });
+        logs: parsed.data.logs.map((log) => ({
+          message: log.message,
+          level: log.level,
+          timestamp: log.timestamp,
+          serviceName: log.serviceName,
+          source: log.source,
+          metadata: log.metadata,
+        })),
+      },
+      {
+        jobId: requestId,
+      }
+    );
 
     // 3. Respond with 202 Accepted + request ID for traceability
     res.setHeader("X-Request-Id", requestId);

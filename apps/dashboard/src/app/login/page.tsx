@@ -1,15 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
-import { ArrowRight, Loader2, Github, Mail, Eye, EyeOff } from "lucide-react";
+import { Loader2, Github, Mail, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,22 +22,29 @@ function LoginForm() {
     setError(null);
     setIsSubmitting(true);
 
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-      callbackUrl,
-    });
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+        callbackUrl,
+      });
 
-    setIsSubmitting(false);
+      if (result?.error) {
+        setError("Invalid credentials or unverified email.");
+        setIsSubmitting(false);
+        return;
+      }
 
-    if (result?.error) {
+      // Hard navigation forces a fresh document request so the freshly-set
+      // session cookie is sent and proxy.ts evaluates the session cleanly.
+      // (A soft router.push races the cookie commit and causes a login loop.)
+      window.location.assign(callbackUrl);
+    } catch (err) {
+      console.error("Login error:", err);
       setError("Invalid credentials or unverified email.");
-      return;
+      setIsSubmitting(false);
     }
-
-    router.push(callbackUrl);
-    router.refresh();
   }
 
   return (
@@ -107,11 +113,12 @@ function LoginForm() {
                 required
                 autoComplete="current-password"
                 placeholder="••••••••"
+                className="pr-10"
               />
               <button 
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-9 text-gray-400 hover:text-white transition-colors"
+                className="absolute right-3 top-9 z-10 text-gray-400 hover:text-white transition-colors"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>

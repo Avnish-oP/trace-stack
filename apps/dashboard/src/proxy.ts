@@ -1,4 +1,9 @@
-import { auth } from "@/lib/auth";
+import NextAuth from "next-auth";
+import { authConfig } from "@/lib/auth.config";
+
+// Use the edge-safe config (no Credentials provider / no fetch) so the session
+// cookie can be decrypted correctly inside the edge proxy runtime.
+const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
   const isLoggedIn = !!req.auth;

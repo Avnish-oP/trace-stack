@@ -10,7 +10,10 @@ const router = Router();
 router.use("/auth", authRouter);
 router.use("/orgs", orgRouter);
 router.use("/projects", projectRouter);
-router.use("/api-keys", apikeyRouter);
+// apikeyRouter defines fully-qualified paths internally
+// (e.g. /projects/:projectId/api-keys and /api-keys/:keyId), so it is mounted
+// at the root to avoid a doubled `/api-keys` prefix.
+router.use("/", apikeyRouter);
 router.use("/logs", logRouter);
 
 export { router };

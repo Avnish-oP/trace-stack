@@ -6,7 +6,7 @@ import morgan from "morgan";
 import { config } from "./config";
 import logsRoutes from "./routes/logs";
 import { errorHandler } from "./middlewares/error-handler.middleware";
-
+import { serverAdapter } from "./lib/queue";
 // ─── Express App ─────────────────────────────────────────────
 
 const app = express();
@@ -37,6 +37,8 @@ app.get("/health", (_, res) => {
     },
   });
 });
+
+app.use("/admin/queues", serverAdapter.getRouter());
 
 // ─── Error Handler (must be last) ────────────────────────────
 

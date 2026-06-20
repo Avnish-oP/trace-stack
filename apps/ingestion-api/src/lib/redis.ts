@@ -10,7 +10,7 @@ const globalForRedis = globalThis as unknown as {
 export const redis =
   globalForRedis.ingestionRedis ??
   new Redis(config.REDIS_URL, {
-    maxRetriesPerRequest: 2,
+    maxRetriesPerRequest: null,
     enableReadyCheck: false,
   });
 

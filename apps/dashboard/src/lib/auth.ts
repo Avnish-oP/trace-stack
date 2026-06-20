@@ -1,12 +1,13 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import { authConfig } from "./auth.config";
 
 // Server-side URL (used by proxy.ts & authorize callback).
 // Falls back to NEXT_PUBLIC_API_URL for convenience in dev.
 const apiUrl = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL;
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  trustHost: true,
+  ...authConfig,
   providers: [
     Credentials({
       name: "Credentials",
@@ -50,32 +51,4 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
-  session: {
-    strategy: "jwt",
-    maxAge: 7 * 24 * 60 * 60,
-  },
-  callbacks: {
-    async jwt({ token, user }) {
-      // On initial sign-in, persist the accessToken from api-server
-      if (user) {
-        token.accessToken = user.accessToken;
-        token.userId = user.id;
-        token.emailVerifiedAt = user.emailVerifiedAt;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      // Expose accessToken and userId to the client session
-      session.accessToken = token.accessToken;
-      if (session.user) {
-        session.user.id = token.userId as string;
-        session.user.emailVerifiedAt = token.emailVerifiedAt;
-      }
-      return session;
-    },
-  },
-  pages: {
-    signIn: "/login",
-  },
-  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
 });

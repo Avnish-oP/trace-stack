@@ -8,14 +8,16 @@
     "apps/*"
   ],
   "scripts": {
-    "dev": "concurrently -n dashboard,api,ingestion -c cyan,green,yellow \"npm run dev -w apps/dashboard\" \"npm run dev -w apps/api-server\" \"npm run dev -w apps/ingestion-api\"",
+    "dev": "concurrently -n dashboard,api,ingestion,worker,ws -c cyan,green,yellow,magenta,blue \"npm run dev -w apps/dashboard\" \"npm run dev -w apps/api-server\" \"npm run dev -w apps/ingestion-api\" \"npm run dev -w apps/processing-worker\" \"npm run dev -w apps/ws-server\"",
     "dev:dashboard": "npm run dev -w apps/dashboard",
     "dev:api": "npm run dev -w apps/api-server",
     "dev:ingestion": "npm run dev -w apps/ingestion-api",
+    "dev:worker": "npm run dev -w apps/processing-worker",
+    "dev:ws": "npm run dev -w apps/ws-server",
     "db:generate": "npm run db:generate -w packages/db",
     "db:migrate": "npm run db:migrate -w packages/db",
     "db:studio": "npm run db:studio -w packages/db",
-    "typecheck": "concurrently \"npx --workspace=packages/shared tsc --noEmit\" \"npx --workspace=apps/ingestion-api tsc --noEmit\" \"npx --workspace=apps/api-server tsc --noEmit\"",
+    "typecheck": "concurrently \"npx --workspace=packages/shared tsc --noEmit\" \"npx --workspace=apps/ingestion-api tsc --noEmit\" \"npx --workspace=apps/api-server tsc --noEmit\" \"npx --workspace=apps/processing-worker tsc --noEmit\" \"npx --workspace=apps/ws-server tsc --noEmit\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

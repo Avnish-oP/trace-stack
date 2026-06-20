@@ -191,11 +191,12 @@ export default function RegisterPage() {
                   required
                   autoComplete="new-password"
                   placeholder="••••••••"
+                  className="pr-10"
                 />
                 <button 
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-9 text-gray-400 hover:text-white transition-colors"
+                  className="absolute right-3 top-9 z-10 text-gray-400 hover:text-white transition-colors"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
