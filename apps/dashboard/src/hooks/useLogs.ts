@@ -23,7 +23,7 @@ interface LogResponse {
   };
 }
 
-export function useLogs(projectId: string, params: Record<string, any> = {}) {
+export function useLogs(projectId: string, params: Record<string, any> = {}, options?: { refetchInterval?: number | false }) {
   return useQuery({
     queryKey: ["logs", projectId, params],
     queryFn: async () => {
@@ -33,6 +33,6 @@ export function useLogs(projectId: string, params: Record<string, any> = {}) {
       return res.data.data;
     },
     enabled: !!projectId,
-    refetchInterval: 5000, // auto-refresh every 5s for now (until we do WebSockets)
+    refetchInterval: options?.refetchInterval ?? false,
   });
 }

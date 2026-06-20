@@ -14,6 +14,6 @@ router.use("/projects", projectRouter);
 // (e.g. /projects/:projectId/api-keys and /api-keys/:keyId), so it is mounted
 // at the root to avoid a doubled `/api-keys` prefix.
 router.use("/", apikeyRouter);
-router.use("/logs", logRouter);
+router.use("/", logRouter);
 
 export { router };

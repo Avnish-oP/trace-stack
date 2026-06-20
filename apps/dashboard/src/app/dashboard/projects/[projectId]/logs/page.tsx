@@ -32,18 +32,9 @@ export default function LogsViewer() {
     limit: 50,
     ...(search ? { search } : {}),
     ...(level ? { level } : {})
+  }, {
+    refetchInterval: (isLiveStream && page === 1 && !search && !level) ? 3000 : false
   });
-
-  // Mock live streaming polling
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isLiveStream && page === 1 && !search && !level) {
-      interval = setInterval(() => {
-        refetch();
-      }, 3000);
-    }
-    return () => clearInterval(interval);
-  }, [isLiveStream, page, search, level, refetch]);
 
   const toggleRow = (id: string, e?: React.MouseEvent) => {
     e?.stopPropagation();

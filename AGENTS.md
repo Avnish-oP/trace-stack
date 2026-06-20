@@ -28,8 +28,17 @@ This file serves as a reference for agents working on the TraceStack project to 
 - ✅ **Live Log Viewer**: New `/dashboard/projects/[projectId]/live` page with real-time streaming via `useLogStream` hook (Socket.IO client). Features: connection status indicator, auto-scroll with "jump to latest", pause/resume with buffered count, level filter toggles, client-side search, expandable metadata rows, terminal-inspired premium UI.
 - ✅ **Sidebar Updated**: Added animated "Live" nav link with pulsing green dot under active projects.
 
+**Pipeline Verification & Debugging Completed:**
+- Fixed a database connection mismatch where `ingestion-api` and `processing-worker` were pointing to `logforge` instead of the central `tracestack-db`. All `.env` files are now unified.
+- Fixed an API Key validation logic mismatch. Both `api-server` and `ingestion-api` now correctly extract the first 12 characters as the prefix for O(1) database lookups.
+- Fixed a routing bug in `api-server` where the logs endpoint was erroneously mounted at `/api/v1/logs/projects/:projectId/logs`. It is now correctly mounted at `/api/v1/projects/:projectId/logs`.
+- Fixed a validation bug in `validate.middleware.ts` by using `Object.defineProperty` to override `req.query`, allowing Zod to correctly inject numeric values for Prisma's `take` and `skip`.
+- Eliminated double-polling on the Logs viewer page by removing a manual `setInterval` and delegating interval control natively to React Query.
+- ✅ The entire E2E pipeline (Node SDK -> Ingestion API -> BullMQ -> Processing Worker -> Postgres & Redis PubSub -> WebSocket Server -> Next.js Live Tail & Historical Logs) has been fully validated and is completely functional.
+
 **Current Focus:**
-- Phase 4 completed successfully. Ready for Phase 5 (Usage Tracking)!
+- Ready to proceed to **Phase 5 (Usage Tracking / Rate Limiting)** to implement metered billing limits.
+- Ready to finalize the **Deployment Plan** for Vercel, Render, Supabase, and Upstash.
 
 ## 🎨 Design System & Preferences
 

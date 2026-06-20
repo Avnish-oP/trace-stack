@@ -20,7 +20,16 @@ export function validate(schema: ZodSchema, part: RequestPart = "body") {
       return;
     }
 
-    req[part] = result.data;
+    if (part === "body") {
+      req[part] = result.data;
+    } else {
+      Object.defineProperty(req, part, {
+        value: result.data,
+        writable: true,
+        configurable: true,
+        enumerable: true
+      });
+    }
     next();
   };
 }
@@ -34,7 +43,12 @@ export function validateTokenQuery(schema: ZodSchema) {
       return;
     }
 
-    req.query = result.data as Request["query"];
+    Object.defineProperty(req, "query", {
+      value: result.data,
+      writable: true,
+      configurable: true,
+      enumerable: true
+    });
     next();
   };
 }
