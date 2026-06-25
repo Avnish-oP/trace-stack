@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "env -u NODE_OPTIONS ts-node-dev --respawn src/index.ts"
+    "dev": "env -u NODE_OPTIONS ts-node-dev --respawn src/index.ts",
+    "build": "tsc",
+    "start": "tsx dist/index.js"
   },
   "keywords": [],
   "author": "",
