@@ -21,6 +21,7 @@ export const authConfig = {
   },
   callbacks: {
     async jwt({ token, user, account, profile }) {
+      console.log("JWT callback triggered. User:", user ? { id: user.id, email: user.email, hasToken: !!user.accessToken } : "none");
       if (account?.provider === "github" && profile) {
         // It's a GitHub sign in. Hit the API to get an access token
         const apiUrl = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL;
@@ -41,6 +42,7 @@ export const authConfig = {
               token.accessToken = data.data.accessToken;
               token.userId = data.data.user.id;
               token.emailVerifiedAt = data.data.user.emailVerifiedAt;
+              console.log("OAuth token set on JWT:", token.accessToken ? "yes" : "no");
             }
           } catch (e) {
             console.error("OAuth token exchange failed", e);
@@ -48,15 +50,21 @@ export const authConfig = {
         }
       }
 
-      // On initial sign-in via Credentials, user is passed
-      if (user && !account) {
-        token.accessToken = user.accessToken;
+      // On initial sign-in, user is passed. Copy the fields if available.
+      if (user) {
+        if (user.accessToken) {
+          token.accessToken = user.accessToken;
+          console.log("Credentials token set on JWT:", token.accessToken ? "yes" : "no");
+        } else {
+          console.log("No user.accessToken found to set on JWT");
+        }
         token.userId = user.id;
         token.emailVerifiedAt = user.emailVerifiedAt;
       }
       return token;
     },
     async session({ session, token }) {
+      console.log("Session callback triggered. Token has token:", !!token.accessToken);
       // Expose accessToken and userId to the client session
       session.accessToken = token.accessToken;
       if (session.user) {

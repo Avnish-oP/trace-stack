@@ -48,7 +48,8 @@ export function authenticate(
     };
 
     next();
-  } catch {
+  } catch (err) {
+    console.error("JWT verification failed:", err);
     errorResponse(res, "Invalid or expired authentication token.", 401);
   }
 }
