@@ -1,10 +1,10 @@
 // ─── Constants ───────────────────────────────────────────────
-export * from "./constants";
+export * from "./constants.ts";
 
 // ─── Zod Schemas ─────────────────────────────────────────────
-export * from "./schemas/log.schema";
-export * from "./schemas/auth.schema";
-export * from "./schemas/org.schema";
+export * from "./schemas/log.schema.ts";
+export * from "./schemas/auth.schema.ts";
+export * from "./schemas/org.schema.ts";
 
 // ─── TypeScript Types ────────────────────────────────────────
-export * from "./types/index";
+export * from "./types/index.ts";
