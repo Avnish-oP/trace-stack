@@ -157,12 +157,14 @@ function LoginForm() {
             <div className="flex-1 h-px bg-[var(--color-border-subtle)]"></div>
           </div>
 
-          <div className="mt-8 grid grid-cols-2 gap-4">
-            <Button variant="outline" className="w-full text-gray-400 hover:text-white" disabled>
-              <Github size={18} className="mr-2" /> GitHub
-            </Button>
-            <Button variant="outline" className="w-full text-gray-400 hover:text-white" disabled>
-              <Mail size={18} className="mr-2" /> Google
+          <div className="mt-8">
+            <Button 
+              type="button"
+              variant="outline" 
+              className="w-full text-gray-400 hover:text-white" 
+              onClick={() => signIn("github", { callbackUrl })}
+            >
+              <Github size={18} className="mr-2" /> Continue with GitHub
             </Button>
           </div>
 

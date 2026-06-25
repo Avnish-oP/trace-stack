@@ -34,6 +34,13 @@ const EnvSchema = z.object({
     .int()
     .positive()
     .default(60),
+
+  // Monthly Usage Limit (Free tier)
+  FREE_TIER_MONTHLY_LIMIT: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(1000),
 });
 
 // ─── Parse & Export ──────────────────────────────────────────

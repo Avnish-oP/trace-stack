@@ -239,6 +239,43 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* How It Works Section */}
+        <section id="how-it-works" className="py-32 relative border-t border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)]">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="text-center mb-20">
+              <h2 className="text-3xl md:text-5xl font-bold mb-6 text-white tracking-tight">How it works</h2>
+              <p className="text-lg text-gray-400 max-w-2xl mx-auto">Three simple steps to integrate observability into your workflow.</p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-12 relative">
+              <div className="hidden md:block absolute top-12 left-1/6 right-1/6 h-0.5 bg-gradient-to-r from-transparent via-[var(--color-brand-primary)] to-transparent opacity-20" />
+              
+              <div className="relative z-10 text-center animate-slide-up">
+                <div className="w-24 h-24 mx-auto rounded-full bg-black border-2 border-[var(--color-brand-primary)] flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(108,92,231,0.2)]">
+                  <span className="text-3xl font-bold text-white">1</span>
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">Install SDK</h3>
+                <p className="text-gray-400">Install our zero-dependency Node.js SDK via npm or yarn and initialize it with your API key.</p>
+              </div>
+
+              <div className="relative z-10 text-center animate-slide-up" style={{ animationDelay: '0.2s' }}>
+                <div className="w-24 h-24 mx-auto rounded-full bg-black border-2 border-[var(--color-brand-secondary)] flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(0,206,201,0.2)]">
+                  <span className="text-3xl font-bold text-white">2</span>
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">Stream Logs</h3>
+                <p className="text-gray-400">Log events organically in your application. They are batched and shipped efficiently in the background.</p>
+              </div>
+
+              <div className="relative z-10 text-center animate-slide-up" style={{ animationDelay: '0.4s' }}>
+                <div className="w-24 h-24 mx-auto rounded-full bg-black border-2 border-purple-500 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(168,85,247,0.2)]">
+                  <span className="text-3xl font-bold text-white">3</span>
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">Monitor Live</h3>
+                <p className="text-gray-400">Open the dashboard to view your logs streaming in real-time. Search, filter, and analyze instantly.</p>
+              </div>
+            </div>
+          </div>
+        </section>
         {/* Pricing */}
         <section id="pricing" className="py-32 relative border-t border-[var(--color-border-subtle)] bg-black/40">
           <div className="max-w-7xl mx-auto px-6">

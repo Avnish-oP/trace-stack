@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useOrgs, useCreateOrg } from "../../hooks/useOrgs";
+import { useStats } from "../../hooks/useStats";
 import { Card, CardHeader, CardTitle, CardDescription } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
@@ -14,7 +15,8 @@ import { useSession } from "next-auth/react";
 
 export default function DashboardOverview() {
   const { data: session } = useSession();
-  const { data: orgs, isLoading } = useOrgs();
+  const { data: orgs, isLoading: isOrgsLoading } = useOrgs();
+  const { data: stats, isLoading: isStatsLoading } = useStats();
   const createOrg = useCreateOrg();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [orgName, setOrgName] = useState("");
@@ -65,7 +67,7 @@ export default function DashboardOverview() {
             </div>
             <div>
               <p className="text-sm font-medium text-gray-400">Total Organizations</p>
-              <h3 className="text-2xl font-bold text-white">{isLoading ? "-" : orgs?.length || 0}</h3>
+              <h3 className="text-2xl font-bold text-white">{isOrgsLoading ? "-" : orgs?.length || 0}</h3>
             </div>
           </div>
         </Card>
@@ -76,7 +78,7 @@ export default function DashboardOverview() {
             </div>
             <div>
               <p className="text-sm font-medium text-gray-400">Total Projects</p>
-              <h3 className="text-2xl font-bold text-white">{isLoading ? "-" : (orgs?.length || 0) * 2}</h3>
+              <h3 className="text-2xl font-bold text-white">{isStatsLoading ? "-" : stats?.totalProjects || 0}</h3>
             </div>
           </div>
         </Card>
@@ -87,7 +89,9 @@ export default function DashboardOverview() {
             </div>
             <div>
               <p className="text-sm font-medium text-gray-400">Logs Ingested (30d)</p>
-              <h3 className="text-2xl font-bold text-white">45.2K <span className="text-xs text-[var(--color-brand-success)] font-normal">+12%</span></h3>
+              <h3 className="text-2xl font-bold text-white">
+                {isStatsLoading ? "-" : stats?.logsIngested30d?.toLocaleString() || 0}
+              </h3>
             </div>
           </div>
         </Card>
@@ -98,7 +102,7 @@ export default function DashboardOverview() {
           Your Organizations
         </h2>
 
-        {isLoading ? (
+        {isOrgsLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map(i => <Skeleton key={i} variant="card" className="h-32" />)}
           </div>
@@ -118,7 +122,6 @@ export default function DashboardOverview() {
             {orgs?.map((org, index) => (
               <Link key={org.id} href={`/dashboard/orgs/${org.id}`} className="block group">
                 <Card className="h-full hover:-translate-y-1 transition-all duration-300 border-[var(--color-border-subtle)] relative overflow-hidden bg-black/40">
-                  <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-[var(--color-brand-primary)] to-[var(--color-brand-secondary)] opacity-0 group-hover:opacity-100 transition-opacity" />
                   <CardHeader className="pb-3 border-b border-white/5">
                     <div className="flex justify-between items-start">
                       <div className="flex items-center gap-3">
@@ -142,11 +145,7 @@ export default function DashboardOverview() {
                   <div className="px-6 py-4 flex gap-6 text-sm">
                     <div className="flex items-center gap-2 text-gray-400 group-hover:text-gray-300 transition-colors">
                       <Activity size={14} className="text-[var(--color-brand-secondary)]" />
-                      <span className="font-medium text-white">2</span> Projects
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-400 group-hover:text-gray-300 transition-colors">
-                      <Users size={14} className="text-[var(--color-brand-primary)]" />
-                      <span className="font-medium text-white">1</span> Member
+                      <span className="font-medium text-white">View</span> Projects
                     </div>
                   </div>
                 </Card>

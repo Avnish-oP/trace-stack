@@ -1,6 +1,7 @@
 import { Worker } from "bullmq";
 import { redis } from "./lib/redis";
 import { processLogBatch } from "./processors/log.processor";
+import { runRetentionJob } from "./jobs/retention.job";
 
 const QUEUE_NAME = "log-ingestion";
 
@@ -9,6 +10,8 @@ export const worker = new Worker(
   async (job) => {
     if (job.name === "batch-ingest") {
       await processLogBatch(job);
+    } else if (job.name === "retention-cron") {
+      await runRetentionJob();
     }
   },
   {

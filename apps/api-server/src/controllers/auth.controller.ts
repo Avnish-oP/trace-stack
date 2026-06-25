@@ -73,3 +73,56 @@ export async function resendVerification(
     next(error);
   }
 }
+
+export async function oauthLogin(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const result = await authService.oauthLogin(req.body);
+    successResponse(res, result);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function forgotPassword(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const result = await authService.forgotPassword(req.body);
+    successResponse(res, result);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function resetPassword(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const result = await authService.resetPassword(req.body);
+    successResponse(res, result);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getDashboardStats(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const userId = (req as AuthenticatedRequest).user.userId;
+    const result = await authService.getDashboardStats(userId);
+    successResponse(res, result);
+  } catch (error) {
+    next(error);
+  }
+}

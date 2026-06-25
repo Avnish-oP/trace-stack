@@ -32,6 +32,17 @@ model EmailVerificationToken {
   @@index([expiresAt])
 }
 
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  email     String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([expiresAt])
+}
+
 // ─── Multi-Tenant: Organizations ─────────────────────────────
 
 model Organization {

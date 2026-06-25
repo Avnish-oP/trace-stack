@@ -293,3 +293,196 @@ export async function resendVerification(input: ResendVerificationInput) {
       "If an unverified account exists for this email, a verification link has been sent.",
   };
 }
+
+export async function oauthLogin(input: import("@trace-stack/shared").OAuthLoginInput) {
+  const email = normalizeEmail(input.email);
+  const name = input.name.trim();
+
+  let user = await prisma.user.findUnique({
+    where: { email },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      image: true,
+      emailVerifiedAt: true,
+    },
+  });
+
+  if (!user) {
+    // Auto-register OAuth user
+    const randomPassword = crypto.randomBytes(32).toString("hex");
+    const passwordHash = await bcrypt.hash(randomPassword, PASSWORD_HASH_ROUNDS);
+
+    const result = await prisma.$transaction(async (tx) => {
+      const newUser = await tx.user.create({
+        data: {
+          email,
+          passwordHash,
+          name,
+          image: input.image,
+          emailVerifiedAt: new Date(), // Auto-verify OAuth emails
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          image: true,
+          emailVerifiedAt: true,
+        },
+      });
+
+      await tx.organization.create({
+        data: {
+          name: `${name}'s Organization`,
+          ownerId: newUser.id,
+        },
+      });
+
+      return newUser;
+    });
+
+    user = result;
+  } else if (!user.emailVerifiedAt) {
+    // If they existed but were unverified, mark verified since OAuth provider verified them
+    user = await prisma.user.update({
+      where: { id: user.id },
+      data: { emailVerifiedAt: new Date() },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        image: true,
+        emailVerifiedAt: true,
+      },
+    });
+  }
+
+  const sanitizedUser = sanitizeUser(user);
+
+  return {
+    user: sanitizedUser,
+    accessToken: signAccessToken(sanitizedUser),
+  };
+}
+
+function createPasswordResetUrl(token: string): string {
+  const url = new URL("/reset-password", config.APP_URL);
+  url.searchParams.set("token", token);
+  return url.toString();
+}
+
+export async function forgotPassword(input: import("@trace-stack/shared").ForgotPasswordInput) {
+  const email = normalizeEmail(input.email);
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  if (!user) {
+    // Fail silently to prevent email enumeration
+    return { message: "If an account exists, a password reset link has been sent." };
+  }
+
+  const rawToken = createRawToken();
+  const tokenHash = hashToken(rawToken);
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+  await prisma.passwordResetToken.deleteMany({ where: { email } });
+
+  await prisma.passwordResetToken.create({
+    data: {
+      email,
+      tokenHash,
+      expiresAt,
+    },
+  });
+
+  const { sendPasswordResetEmail } = await import("./email.service");
+  await sendPasswordResetEmail({
+    to: email,
+    name: user.name,
+    resetUrl: createPasswordResetUrl(rawToken),
+  });
+
+  return { message: "If an account exists, a password reset link has been sent." };
+}
+
+export async function resetPassword(input: import("@trace-stack/shared").ResetPasswordInput) {
+  const tokenHash = hashToken(input.token);
+  const resetToken = await prisma.passwordResetToken.findUnique({
+    where: { tokenHash },
+  });
+
+  if (!resetToken) {
+    throw new AppError("Invalid or expired password reset token.", 400);
+  }
+
+  if (resetToken.expiresAt.getTime() < Date.now()) {
+    await prisma.passwordResetToken.delete({ where: { id: resetToken.id } });
+    throw new AppError("Invalid or expired password reset token.", 400);
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: resetToken.email },
+  });
+
+  if (!user) {
+    await prisma.passwordResetToken.delete({ where: { id: resetToken.id } });
+    throw new AppError("Invalid or expired password reset token.", 400);
+  }
+
+  const passwordHash = await bcrypt.hash(input.password, PASSWORD_HASH_ROUNDS);
+
+  await prisma.$transaction(async (tx) => {
+    await tx.user.update({
+      where: { id: user.id },
+      data: { passwordHash, emailVerifiedAt: user.emailVerifiedAt ?? new Date() },
+    });
+
+    await tx.passwordResetToken.deleteMany({ where: { email: user.email } });
+  });
+
+  return { message: "Password has been successfully reset. You can now log in." };
+}
+
+export async function getDashboardStats(userId: string) {
+  // Find organizations owned by this user
+  const orgs = await prisma.organization.findMany({
+    where: { ownerId: userId },
+    select: { id: true },
+  });
+
+  const orgIds = orgs.map((org) => org.id);
+
+  if (orgIds.length === 0) {
+    return {
+      totalProjects: 0,
+      logsIngested30d: 0,
+      growthRate: 0,
+    };
+  }
+
+  // Count total projects in these orgs
+  const totalProjects = await prisma.project.count({
+    where: { organizationId: { in: orgIds } },
+  });
+
+  // Calculate logs ingested in last 30 days
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const logsIngested30d = await prisma.log.count({
+    where: {
+      project: { organizationId: { in: orgIds } },
+      timestamp: { gte: thirtyDaysAgo },
+    },
+  });
+
+  // Since we only store up to 30 days of logs usually (or whatever retention is),
+  // we'll just mock growthRate for now or return 0.
+  const growthRate = 0;
+
+  return {
+    totalProjects,
+    logsIngested30d,
+    growthRate,
+  };
+}

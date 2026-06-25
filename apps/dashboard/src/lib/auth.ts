@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import GitHub from "next-auth/providers/github";
 import { authConfig } from "./auth.config";
 
 // Server-side URL (used by proxy.ts & authorize callback).
@@ -9,6 +10,10 @@ const apiUrl = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL;
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
   providers: [
+    GitHub({
+      clientId: process.env.AUTH_GITHUB_ID,
+      clientSecret: process.env.AUTH_GITHUB_SECRET,
+    }),
     Credentials({
       name: "Credentials",
       credentials: {

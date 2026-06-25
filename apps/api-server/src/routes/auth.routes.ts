@@ -4,6 +4,9 @@ import {
   RegisterSchema,
   ResendVerificationSchema,
   VerifyEmailSchema,
+  OAuthLoginSchema,
+  ForgotPasswordSchema,
+  ResetPasswordSchema,
 } from "@trace-stack/shared";
 import {
   login,
@@ -11,6 +14,10 @@ import {
   register,
   resendVerification,
   verifyEmail,
+  oauthLogin,
+  forgotPassword,
+  resetPassword,
+  getDashboardStats,
 } from "../controllers/auth.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { redisRateLimit } from "../middlewares/rate-limit.middleware";
@@ -33,7 +40,11 @@ const verificationResendRateLimit = redisRateLimit({
 
 router.post("/register", authRateLimit, validate(RegisterSchema), register);
 router.post("/login", authRateLimit, validate(LoginSchema), login);
+router.post("/oauth", authRateLimit, validate(OAuthLoginSchema), oauthLogin);
+router.post("/forgot-password", authRateLimit, validate(ForgotPasswordSchema), forgotPassword);
+router.post("/reset-password", authRateLimit, validate(ResetPasswordSchema), resetPassword);
 router.get("/me", authenticate, me);
+router.get("/me/stats", authenticate, getDashboardStats);
 router.get(
   "/verify-email",
   validateTokenQuery(VerifyEmailSchema),

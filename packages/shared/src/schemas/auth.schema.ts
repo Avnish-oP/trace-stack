@@ -56,3 +56,36 @@ export const UpdateProfileSchema = z.object({
 });
 
 export type UpdateProfileInput = z.infer<typeof UpdateProfileSchema>;
+
+// ─── OAuth Login ─────────────────────────────────────────────
+
+export const OAuthLoginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  name: z.string().min(1, "Name is required"),
+  image: z.string().url().optional().nullable(),
+  provider: z.string(),
+});
+
+export type OAuthLoginInput = z.infer<typeof OAuthLoginSchema>;
+
+// ─── Password Reset ──────────────────────────────────────────
+
+export const ForgotPasswordSchema = z.object({
+  email: z.string().email("Invalid email address"),
+});
+
+export type ForgotPasswordInput = z.infer<typeof ForgotPasswordSchema>;
+
+export const ResetPasswordSchema = z.object({
+  token: z.string().min(1, "Token is required"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .max(128, "Password must be under 128 characters")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+    ),
+});
+
+export type ResetPasswordInput = z.infer<typeof ResetPasswordSchema>;

@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
-import { ArrowRight, Loader2, MailCheck, Check, EyeOff, Eye } from "lucide-react";
+import { ArrowRight, Loader2, MailCheck, Check, EyeOff, Eye, Github } from "lucide-react";
+import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
@@ -242,6 +243,23 @@ export default function RegisterPage() {
               {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : "Create account"}
             </Button>
           </form>
+
+          <div className="mt-8 flex items-center gap-4">
+            <div className="flex-1 h-px bg-[var(--color-border-subtle)]"></div>
+            <span className="text-xs font-medium text-gray-500 uppercase tracking-widest">Or continue with</span>
+            <div className="flex-1 h-px bg-[var(--color-border-subtle)]"></div>
+          </div>
+
+          <div className="mt-8">
+            <Button 
+              type="button"
+              variant="outline" 
+              className="w-full text-gray-400 hover:text-white" 
+              onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
+            >
+              <Github size={18} className="mr-2" /> Continue with GitHub
+            </Button>
+          </div>
 
           <p className="mt-8 text-center text-sm text-gray-400">
             Already have an account?{" "}

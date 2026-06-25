@@ -20,9 +20,36 @@ export const authConfig = {
     maxAge: 7 * 24 * 60 * 60,
   },
   callbacks: {
-    async jwt({ token, user }) {
-      // On initial sign-in, persist the accessToken from api-server
-      if (user) {
+    async jwt({ token, user, account, profile }) {
+      if (account?.provider === "github" && profile) {
+        // It's a GitHub sign in. Hit the API to get an access token
+        const apiUrl = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL;
+        if (apiUrl) {
+          try {
+            const res = await fetch(`${apiUrl}/api/v1/auth/oauth`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                email: profile.email,
+                name: profile.name || profile.login,
+                image: profile.avatar_url,
+                provider: "github",
+              }),
+            });
+            const data = await res.json();
+            if (data.success) {
+              token.accessToken = data.data.accessToken;
+              token.userId = data.data.user.id;
+              token.emailVerifiedAt = data.data.user.emailVerifiedAt;
+            }
+          } catch (e) {
+            console.error("OAuth token exchange failed", e);
+          }
+        }
+      }
+
+      // On initial sign-in via Credentials, user is passed
+      if (user && !account) {
         token.accessToken = user.accessToken;
         token.userId = user.id;
         token.emailVerifiedAt = user.emailVerifiedAt;

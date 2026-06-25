@@ -1,0 +1,76 @@
+services:
+  # ─── API Server (Dashboard Backend) ───
+  - type: web
+    name: tracestack-api-server
+    env: node
+    buildCommand: npm install && npm run db:generate && npm run build -w api-server
+    startCommand: npm start -w api-server
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: API_JWT_SECRET
+        sync: false
+      - key: NEXTAUTH_SECRET
+        sync: false
+      - key: NEXT_PUBLIC_DASHBOARD_URL
+        value: https://tracestack.avnishgupta.dev
+
+  # ─── Ingestion API ───
+  - type: web
+    name: tracestack-ingestion-api
+    env: node
+    buildCommand: npm install && npm run db:generate && npm run build -w ingestion-api
+    startCommand: npm start -w ingestion-api
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: RATE_LIMIT_MAX
+        value: "1000"
+      - key: RATE_LIMIT_WINDOW_SECONDS
+        value: "60"
+
+  # ─── WebSocket Server ───
+  - type: web
+    name: tracestack-ws-server
+    env: node
+    buildCommand: npm install && npm run db:generate && npm run build -w ws-server
+    startCommand: npm start -w ws-server
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3003
+      - key: API_JWT_SECRET
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: DASHBOARD_URL
+        value: https://tracestack.avnishgupta.dev
+
+  # ─── Processing Worker ───
+  - type: worker
+    name: tracestack-processing-worker
+    env: node
+    buildCommand: npm install && npm run db:generate && npm run build -w processing-worker
+    startCommand: npm start -w processing-worker
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
