@@ -25,5 +25,8 @@
   "license": "ISC",
   "devDependencies": {
     "concurrently": "^9.0.0"
+  },
+  "dependencies": {
+    "@trace-stack/node": "^1.0.0"
   }
 }

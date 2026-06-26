@@ -2,12 +2,18 @@ import Redis from "ioredis";
 import { config } from "../config";
 
 // ─── General-purpose Redis connection ────────────────────────
-export const redis = new Redis(config.REDIS_URL);
+export const redis = new Redis(config.REDIS_URL, {
+  family: 0,
+  keepAlive: 10000,
+});
 
 // ─── Dedicated Pub/Sub subscriber ────────────────────────────
 // Redis requires a separate connection for subscriptions.
 // Once a connection calls `psubscribe`, it can only receive messages.
-export const subscriber = new Redis(config.REDIS_URL);
+export const subscriber = new Redis(config.REDIS_URL, {
+  family: 0,
+  keepAlive: 10000,
+});
 
 redis.on("error", (err) => {
   console.error("[ws-server:redis] Connection error:", err.message);
